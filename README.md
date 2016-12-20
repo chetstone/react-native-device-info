@@ -175,4 +175,6 @@ console.log("App Instance ID", DeviceInfo.getInstanceID()); // ANDROID ONLY - se
 console.log("App is running in emulator", DeviceInfo.isEmulator()); // if app is running in emulator return true
 
 console.log("App is running on a tablet", DeviceInfo.isTablet()); // if app is running on a tablet return true
+
+console.log("Device has vibration capability", DeviceInfo.isVibrator()); // ANDROID ONLY
 ```
