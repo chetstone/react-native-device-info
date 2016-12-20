@@ -156,6 +156,8 @@ console.log("Bundle ID", DeviceInfo.getBundleId());  // e.g. com.learnium.mobile
 
 console.log("Build Number", DeviceInfo.getBuildNumber());  // e.g. 89
 
+console.log("Build Version", DeviceInfo.getBuildVersion());  // iOS only: full build info, e.g. v0.5.9-51-g71ec8a0+, or the string "Not Available" if not defined.
+
 console.log("App Version", DeviceInfo.getVersion());  // e.g. 1.1.0
 
 console.log("App Version (Readable)", DeviceInfo.getReadableVersion());  // e.g. 1.1.0.89
