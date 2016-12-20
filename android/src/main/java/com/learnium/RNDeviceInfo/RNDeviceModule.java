@@ -5,6 +5,8 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Build;
+import android.content.Context;
+import android.os.Vibrator;
 import android.provider.Settings.Secure;
 
 import com.google.android.gms.iid.InstanceID;
@@ -64,10 +66,17 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
       || "google_sdk".equals(Build.PRODUCT);
   }
 
-  private Boolean isTablet() {
-    int layout = getReactApplicationContext().getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
-    return layout == Configuration.SCREENLAYOUT_SIZE_LARGE || layout == Configuration.SCREENLAYOUT_SIZE_XLARGE;
-  }
+    private Boolean isTablet() {
+        int layout = getReactApplicationContext().getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
+        return layout == Configuration.SCREENLAYOUT_SIZE_LARGE || layout == Configuration.SCREENLAYOUT_SIZE_XLARGE;
+    }
+
+    private Boolean isVibrator() {
+        String vs = Context.VIBRATOR_SERVICE;
+        Vibrator mVibrator = (Vibrator)getReactApplicationContext().getSystemService(vs);
+
+        return mVibrator.hasVibrator();
+    }
 
   @Override
   public @Nullable Map<String, Object> getConstants() {
@@ -113,6 +122,7 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
     constants.put("timezone", TimeZone.getDefault().getID());
     constants.put("isEmulator", this.isEmulator());
     constants.put("isTablet", this.isTablet());
+    constants.put("isVibrator", this.isVibrator());
     return constants;
   }
 }

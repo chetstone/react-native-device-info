@@ -62,4 +62,7 @@ module.exports = {
   isTablet: function() {
     return RNDeviceInfo.isTablet;
   },
+  isVibrator: function() {
+    return RNDeviceInfo.isVibrator;
+  },
 };
