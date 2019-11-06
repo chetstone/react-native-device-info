@@ -1168,17 +1168,19 @@ export function isHeadphonesConnectedSync() {
   return false;
 }
 export function isVibrator() {
-  if (OS === 'android' || OS === 'ios') {
+  if (OS === 'android' ) {
     return RNDeviceInfo.isVibrator();
+  } else {
+    return RNDeviceInfo.deviceType === 'Handset'
   }
-  return false;
 }
 
 export function isVibratorSync() {
   if (OS === 'android' || OS === 'ios') {
     return RNDeviceInfo.isVibratorSync();
+  } else {
+    return RNDeviceInfo.deviceType === 'Handset'
   }
-  return false;
 }
 
 export async function getAvailableLocationProviders() {
