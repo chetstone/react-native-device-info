@@ -1167,6 +1167,19 @@ export function isHeadphonesConnectedSync() {
   }
   return false;
 }
+export function isVibrator() {
+  if (OS === 'android' || OS === 'ios') {
+    return RNDeviceInfo.isVibrator();
+  }
+  return false;
+}
+
+export function isVibratorSync() {
+  if (OS === 'android' || OS === 'ios') {
+    return RNDeviceInfo.isVibratorSync();
+  }
+  return false;
+}
 
 export async function getAvailableLocationProviders() {
   if (OS === 'android' || OS === 'ios') {
@@ -1390,6 +1403,8 @@ export default {
   isLocationEnabledSync,
   isHeadphonesConnected,
   isHeadphonesConnectedSync,
+  isVibrator,
+  isVibratorSync,
   getAvailableLocationProviders,
   getAvailableLocationProvidersSync,
   useBatteryLevel,

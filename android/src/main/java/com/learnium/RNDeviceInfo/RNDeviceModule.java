@@ -20,7 +20,9 @@ import android.os.Environment;
 import android.os.PowerManager;
 import android.os.StatFs;
 import android.os.BatteryManager;
+import android.os.Vibrator;
 import android.provider.Settings;
+import android.provider.Settings.Secure;
 import android.webkit.WebSettings;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -777,6 +779,15 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
   }
   @ReactMethod
   public void getSupported64BitAbis(Promise p) { p.resolve(getSupported64BitAbisSync()); }
+
+  @ReactMethod(isBlockingSynchronousMethod = true)
+  public boolean isVibratorSync() {
+    String vs = Context.VIBRATOR_SERVICE;
+    Vibrator mVibrator = (Vibrator)getReactApplicationContext().getSystemService(vs);
+    return mVibrator.hasVibrator();
+  }
+  @ReactMethod
+  public void isVibrator(Promise p) {p.resolve(isVibratorSync());}
 
 
   private WritableMap getPowerStateFromIntent (Intent intent) {
