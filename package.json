@@ -27,7 +27,7 @@
     "shipit": "yarn clean && np",
     "test": "echo no tests defined",
     "precommit": "lint-staged && yarn analyze",
-    "build": "bob build",
+    "build": "bob build"
   },
   "lint-staged": {
     "*.ts": [
