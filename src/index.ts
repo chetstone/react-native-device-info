@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Dimensions, NativeEventEmitter, NativeModules, Platform } from 'react-native';
 import { useOnEvent, useOnMount } from './internal/asyncHookWrappers';
-import devicesWithDynamicIsland from "./internal/devicesWithDynamicIsland";
+import devicesWithDynamicIsland from './internal/devicesWithDynamicIsland';
 import devicesWithNotch from './internal/devicesWithNotch';
 import RNDeviceInfo from './internal/nativeInterface';
 import {
@@ -203,6 +203,14 @@ export const getVersion = () =>
     defaultValue: 'unknown',
     supportedPlatforms: ['android', 'ios', 'windows'],
     getter: () => RNDeviceInfo.appVersion,
+  });
+
+export const getBuildVersion = () =>
+  getSupportedPlatformInfoSync({
+    memoKey: 'buildVersion',
+    supportedPlatforms: ['ios'],
+    getter: () => RNDeviceInfo.buildVersion,
+    defaultValue: 'unknown',
   });
 
 export function getReadableVersion() {
@@ -859,6 +867,7 @@ const deviceInfoModule: DeviceInfoModule = {
   getBuildId,
   getBuildIdSync,
   getBuildNumber,
+  getBuildVersion,
   getBundleId,
   getCarrier,
   getCarrierSync,
