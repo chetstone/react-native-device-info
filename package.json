@@ -28,7 +28,6 @@
     "test": "echo no tests defined",
     "precommit": "lint-staged && yarn analyze",
     "build": "bob build",
-    "prepare": "yarn build"
   },
   "lint-staged": {
     "*.ts": [
