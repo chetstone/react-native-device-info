@@ -696,6 +696,13 @@ export const isTabletMode = () =>
     defaultValue: false,
   });
 
+export const [isVibrator, isVibratorSync] = getSupportedPlatformInfoFunctions({
+  supportedPlatforms: ['android'],
+  getter: () => RNDeviceInfo.isVibrator(),
+  syncGetter: () => RNDeviceInfo.isVibratorSync(),
+  defaultValue: false,
+});
+
 export const [
   getAvailableLocationProviders,
   getAvailableLocationProvidersSync,
