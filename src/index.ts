@@ -307,6 +307,18 @@ export function getBuildNumber() {
   return buildNumber;
 }
 
+let buildVersion: string;
+export function getBuildVersion() {
+  if (!buildVersion) {
+    if ( OS === 'ios' ) {
+      buildVersion = RNDeviceInfo.buildVersion;
+    } else {
+      buildVersion = 'unknown';
+    }
+  }
+  return buildVersion;
+}
+
 let version: string;
 export function getVersion() {
   if (!version) {
@@ -766,7 +778,7 @@ export function hasNotch() {
       devicesWithNotch.findIndex(
         item =>
           item.brand.toLowerCase() === _brand.toLowerCase() &&
-          item.model.toLowerCase() === _model.toLowerCase()
+              item.model.toLowerCase() === _model.toLowerCase()
       ) !== -1;
   }
   return notch;
@@ -1291,6 +1303,7 @@ export default {
   getBundleId,
   getApplicationName,
   getBuildNumber,
+  getBuildVersion,
   getVersion,
   getReadableVersion,
   getDeviceName,

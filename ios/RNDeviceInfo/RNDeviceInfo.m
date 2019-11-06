@@ -63,6 +63,7 @@ RCT_EXPORT_MODULE();
          @"systemVersion": [self getSystemVersion],
          @"appVersion": [self getAppVersion],
          @"buildNumber": [self getBuildNumber],
+         @"buildVersion": [self getBuildVersion],
          @"isTablet": @([self isTablet]),
          @"appName": [self getAppName],
          @"brand": @"Apple",
@@ -154,6 +155,10 @@ RCT_EXPORT_METHOD(getDeviceName:(RCTPromiseResolveBlock)resolve rejecter:(RCTPro
 
 - (NSString *) getBuildNumber {
     return [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"];
+}
+
+- (NSString *) getBuildVersion {
+    return [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleBuildVersion"] ?: @"Not Available",
 }
 
 - (NSDictionary *) getDeviceNamesByCode {
