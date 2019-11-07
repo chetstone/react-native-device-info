@@ -1176,7 +1176,7 @@ export function isVibrator() {
 }
 
 export function isVibratorSync() {
-  if (OS === 'android' || OS === 'ios') {
+  if (OS === 'android' ) {
     return RNDeviceInfo.isVibratorSync();
   } else {
     return RNDeviceInfo.deviceType === 'Handset'
