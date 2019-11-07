@@ -158,7 +158,7 @@ RCT_EXPORT_METHOD(getDeviceName:(RCTPromiseResolveBlock)resolve rejecter:(RCTPro
 }
 
 - (NSString *) getBuildVersion {
-    return [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleBuildVersion"] ?: @"Not Available",
+    return [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleBuildVersion"] ?: @"Not Available";
 }
 
 - (NSDictionary *) getDeviceNamesByCode {
