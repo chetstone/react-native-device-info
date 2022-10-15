@@ -45,10 +45,6 @@
     "example:packager": "cd example && yarn start",
     "test": "jest",
     "precommit": "lint-staged && yarn analyze",
-    "build": "bob build",
-    "prepare": "bob build",
-    "ci:install": "rm -rf ./node_modules && yarn install --frozen-lockfile",
-    "ci:shipit": "semantic-release"
   },
   "lint-staged": {
     "*.ts": [
