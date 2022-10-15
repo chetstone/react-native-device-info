@@ -43,8 +43,7 @@
     "example:ios:build": "cd example/ios && xcodebuild CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ -workspace example.xcworkspace -configuration Debug -scheme example -sdk iphonesimulator -arch x86_64 ONLY_ACTIVE_ARCH=YES | xcpretty",
     "example:windows": "cd example && yarn windows",
     "example:packager": "cd example && yarn start",
-    "test": "jest",
-    "precommit": "lint-staged && yarn analyze",
+    "test": "jest"
   },
   "lint-staged": {
     "*.ts": [
