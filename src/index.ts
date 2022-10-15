@@ -988,6 +988,8 @@ const deviceInfoModule: DeviceInfoModule = {
   isKeyboardConnectedSync,
   isTabletMode,
   isTablet,
+  isVibrator,
+  isVibratorSync,
   supported32BitAbis,
   supported32BitAbisSync,
   supported64BitAbis,
