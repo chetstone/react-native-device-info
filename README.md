@@ -43,12 +43,13 @@ yarn add react-native-device-info
 If you want to use Install Referrer tracking, you will need to add this config to your Proguard config
 
 ```
--keepclassmembers class com.android.installreferrer.api.** {
+-keep class com.android.installreferrer.api.** {
   *;
 }
 ```
 
 If you are experiencing issues with hasGms() on your release apks, please add the following rule to your Proguard config
+
 ```
 -keep class com.google.android.gms.common.** {*;}
 ```
@@ -118,86 +119,91 @@ While the asynchronous method `getUserAgent` is available on both platforms, `ge
 
 The example app in this repository shows an example usage of every single API, consult the example app if you have questions, and if you think you see a problem make sure you can reproduce it using the example app before reporting it, thank you.
 
-| Method                                                            | Return Type         |  iOS | Android | Windows | Web |
-| ----------------------------------------------------------------- | ------------------- | :--: | :-----: | :-----: | :-: |
-| [getAndroidId()](#getandroidid)                                   | `Promise<string>`   |  ❌  |   ✅    |   ❌    | ❌  |
-| [getApiLevel()](#getapilevel)                                     | `Promise<number>`   |  ❌  |   ✅    |   ❌    | ❌  |
-| [getApplicationName()](#getapplicationname)                       | `string`            |  ✅  |   ✅    |   ✅    | ❌  |
-| [getAvailableLocationProviders()](#getAvailableLocationProviders) | `Promise<Object>`   |  ✅  |   ✅    |   ❌    | ❌  |
-| [getBaseOs()](#getbaseOs)                                         | `Promise<string>`   |  ❌  |   ✅    |   ✅    | ✅  |
-| [getBuildId()](#getbuildid)                                       | `Promise<string>`   |  ✅  |   ✅    |   ✅    | ❌  |
-| [getBatteryLevel()](#getbatterylevel)                             | `Promise<number>`   |  ✅  |   ✅    |   ✅    | ✅  |
-| [getBootloader()](#getbootloader)                                 | `Promise<string>`   |  ❌  |   ✅    |   ❌    | ❌  |
-| [getBrand()](#getbrand)                                           | `string`            |  ✅  |   ✅    |   ✅    | ❌  |
-| [getBuildNumber()](#getbuildnumber)                               | `string`            |  ✅  |   ✅    |   ✅    | ❌  |
-| [getBundleId()](#getbundleid)                                     | `string`            |  ✅  |   ✅    |   ✅    | ❌  |
-| [isCameraPresent()](#iscamerapresent)                             | `Promise<boolean>`  |  ❌  |   ✅    |   ✅    | ✅  |
-| [getCarrier()](#getcarrier)                                       | `Promise<string>`   |  ✅  |   ✅    |   ❌    | ❌  |
-| [getCodename()](#getcodename)                                     | `Promise<string>`   |  ❌  |   ✅    |   ❌    | ❌  |
-| [getDevice()](#getdevice)                                         | `Promise<string>`   |  ❌  |   ✅    |   ❌    | ❌  |
-| [getDeviceId()](#getdeviceid)                                     | `string`            |  ✅  |   ✅    |   ✅    | ❌  |
-| [getDeviceType()](#getDeviceType)                                 | `string`            |  ✅  |   ✅    |   ❌    | ❌  |
-| [getDisplay()](#getdisplay)                                       | `Promise<string>`   |  ❌  |   ✅    |   ❌    | ❌  |
-| [getDeviceName()](#getdevicename)                                 | `Promise<string>`   |  ✅  |   ✅    |   ✅    | ❌  |
-| [getDeviceToken()](#getdevicetoken)                               | `Promise<string>`   |  ✅  |   ❌    |   ❌    | ❌  |
-| [getFirstInstallTime()](#getfirstinstalltime)                     | `Promise<number>`   |  ✅  |   ✅    |   ✅    | ❌  |
-| [getFingerprint()](#getfingerprint)                               | `Promise<string>`   |  ❌  |   ✅    |   ❌    | ❌  |
-| [getFontScale()](#getfontscale)                                   | `Promise<number>`   |  ✅  |   ✅    |   ✅    | ❌  |
-| [getFreeDiskStorage()](#getfreediskstorage)                       | `Promise<number>`   |  ✅  |   ✅    |   ✅    | ✅  |
-| [getFreeDiskStorageOld()](#getfreediskstorageold)                 | `Promise<number>`   |  ✅  |   ✅    |   ✅    | ✅  |
-| [getHardware()](#gethardware)                                     | `Promise<string>`   |  ❌  |   ✅    |   ❌    | ❌  |
-| [getHost()](#gethost)                                             | `Promise<string>`   |  ❌  |   ✅    |   ❌    | ❌  |
-| [getIpAddress()](#getipaddress)                                   | `Promise<string>`   |  ✅  |   ✅    |   ✅    | ❌  |
-| [getIncremental()](#getincremental)                               | `Promise<string>`   |  ❌  |   ✅    |   ❌    | ❌  |
-| [getInstallerPackageName()](#getinstallerpackagename)             | `Promise<string>`   |  ✅  |   ✅    |   ✅    | ❌  |
-| [getInstallReferrer()](#getinstallreferrer)                       | `Promise<string>`   |  ❌  |   ✅    |   ✅    | ✅  |
-| [getInstanceId()](#getinstanceid)                                 | `Promise<string>`   |  ❌  |   ✅    |   ❌    | ❌  |
-| [getLastUpdateTime()](#getlastupdatetime)                         | `Promise<number>`   |  ❌  |   ✅    |   ❌    | ❌  |
-| [getMacAddress()](#getmacaddress)                                 | `Promise<string>`   |  ✅  |   ✅    |   ❌    | ❌  |
-| [getManufacturer()](#getmanufacturer)                             | `Promise<string>`   |  ✅  |   ✅    |   ✅    | ❌  |
-| [getMaxMemory()](#getmaxmemory)                                   | `Promise<number>`   |  ❌  |   ✅    |   ✅    | ✅  |
-| [getModel()](#getmodel)                                           | `string`            |  ✅  |   ✅    |   ✅    | ❌  |
-| [getPhoneNumber()](#getphonenumber)                               | `Promise<string>`   |  ❌  |   ✅    |   ❌    | ❌  |
-| [getPowerState()](#getpowerstate)                                 | `Promise<object>`   |  ✅  |   ✅    |   ✅    | ✅  |
-| [getProduct()](#getproduct)                                       | `Promise<string>`   |  ❌  |   ✅    |   ❌    | ❌  |
-| [getPreviewSdkInt()](#getPreviewSdkInt)                           | `Promise<number>`   |  ❌  |   ✅    |   ❌    | ❌  |
-| [getReadableVersion()](#getreadableversion)                       | `string`            |  ✅  |   ✅    |   ✅    | ❌  |
-| [getSerialNumber()](#getserialnumber)                             | `Promise<string>`   |  ❌  |   ✅    |   ✅    | ❌  |
-| [getSecurityPatch()](#getsecuritypatch)                           | `Promise<string>`   |  ❌  |   ✅    |   ❌    | ❌  |
-| [getSystemAvailableFeatures()](#getSystemAvailableFeatures)       | `Promise<string[]>` |  ❌  |   ✅    |   ❌    | ❌  |
-| [getSystemName()](#getsystemname)                                 | `string`            |  ✅  |   ✅    |   ✅    | ❌  |
-| [getSystemVersion()](#getsystemversion)                           | `string`            |  ✅  |   ✅    |   ✅    | ❌  |
-| [getTags()](#gettags)                                             | `Promise<string>`   |  ❌  |   ✅    |   ❌    | ❌  |
-| [getType()](#gettype)                                             | `Promise<string>`   |  ❌  |   ✅    |   ❌    | ❌  |
-| [getTotalDiskCapacity()](#gettotaldiskcapacity)                   | `Promise<number>`   |  ✅  |   ✅    |   ✅    | ✅  |
-| [getTotalDiskCapacityOld()](#gettotaldiskcapacityold)             | `Promise<number>`   |  ✅  |   ✅    |   ✅    | ✅  |
-| [getTotalMemory()](#gettotalmemory)                               | `Promise<number>`   |  ✅  |   ✅    |   ❌    | ✅  |
-| [getUniqueId()](#getuniqueid)                                     | `Promise<string>`   |  ✅  |   ✅    |   ✅    | ❌  |
-| [getUsedMemory()](#getusedmemory)                                 | `Promise<number>`   |  ✅  |   ✅    |   ✅    | ✅  |
-| [getUserAgent()](#getuseragent)                                   | `Promise<string>`   |  ✅  |   ✅    |   ❌    | ✅  |
-| [getUserAgentSync()](#getuseragent)                               | `string`            |  ❌  |   ✅    |   ❌    | ✅  |
-| [getVersion()](#getversion)                                       | `string`            |  ✅  |   ✅    |   ✅    | ❌  |
-| [getBrightness()](#getBrightness)                                 | `Promise<number>`   |  ✅  |   ❌    |   ❌    | ❌  |
-| [hasGms()](#hasGms)                                               | `Promise<boolean>`  |  ❌  |   ✅    |   ❌    | ❌  |
-| [hasHms()](#hasHms)                                               | `Promise<boolean>`  |  ❌  |   ✅    |   ❌    | ❌  |
-| [hasNotch()](#hasNotch)                                           | `boolean`           |  ✅  |   ✅    |   ✅    | ❌  |
-| [hasDynamicIsland()](#hasDynamicIsland)                           | `boolean`           |  ✅  |   ✅    |   ✅    | ❌  |
-| [hasSystemFeature()](#hassystemfeaturefeature)                    | `Promise<boolean>`  |  ❌  |   ✅    |   ❌    | ❌  |
-| [isAirplaneMode()](#isairplanemode)                               | `Promise<boolean>`  |  ❌  |   ✅    |   ❌    | ✅  |
-| [isBatteryCharging()](#isbatterycharging)                         | `Promise<boolean>`  |  ✅  |   ✅    |   ✅    | ✅  |
-| [isEmulator()](#isemulator)                                       | `Promise<boolean>`  |  ✅  |   ✅    |   ✅    | ❌  |
-| [isKeyboardConnected()](#iskeyboardconnected)                     | `Promise<bool>`     |  ❌  |   ❌    |   ✅    | ❌  |
-| [isLandscape()](#isLandscape)                                     | `Promise<boolean>`  |  ✅  |   ✅    |   ✅    | ❌  |
-| [isLocationEnabled()](#isLocationEnabled)                         | `Promise<boolean>`  |  ✅  |   ✅    |   ❌    | ✅  |
-| [isMouseConnected()](#ismouseconneted)                            | `Promise<bool>`     |  ❌  |   ❌    |   ✅    | ❌  |
-| [isHeadphonesConnected()](#isHeadphonesConnected)                 | `Promise<boolean>`  |  ✅  |   ✅    |   ❌    | ❌  |
-| [isPinOrFingerprintSet()](#ispinorfingerprintset)                 | `Promise<boolean>`  |  ✅  |   ✅    |   ✅    | ❌  |
-| [isTablet()](#istablet)                                           | `boolean`           |  ✅  |   ✅    |   ✅    | ❌  |
-| [isTabletMode()](#istabletmode)                                   | `Promise<bool>`     |  ❌  |   ❌    |   ✅    | ❌  |
-| [supported32BitAbis()](#supported32BitAbis)                       | `Promise<string[]>` |  ❌  |   ✅    |   ❌    | ❌  |
-| [supported64BitAbis()](#supported64BitAbis)                       | `Promise<string[]>` |  ❌  |   ✅    |   ❌    | ❌  |
-| [supportedAbis()](#supportedAbis)                                 | `Promise<string[]>` |  ✅  |   ✅    |   ✅    | ❌  |
-| [syncUniqueId()](#syncuniqueid)                                   | `Promise<string>`   |  ✅  |   ❌    |   ❌    | ❌  |
+| Method                                                              | Return Type         |  iOS | Android | Windows | Web  | visionOS |
+| ------------------------------------------------------------------- | ------------------- | :--: | :-----: | :-----: | :-:  | :------: |
+| [getAndroidId()](#getandroidid)                                     | `Promise<string>`   |  ❌  |   ✅    |   ❌     | ❌   |   ❌     |
+| [getApiLevel()](#getapilevel)                                       | `Promise<number>`   |  ❌  |   ✅    |   ❌     | ❌   |   ❌     |
+| [getApplicationName()](#getapplicationname)                         | `string`            |  ✅  |   ✅    |   ✅     | ❌   |   ✅     |
+| [getAvailableLocationProviders()](#getAvailableLocationProviders)   | `Promise<Object>`   |  ✅  |   ✅    |   ❌     | ❌   |   ✅     |
+| [getBaseOs()](#getbaseOs)                                           | `Promise<string>`   |  ❌  |   ✅    |   ✅     | ✅   |   ❌     |
+| [getBuildId()](#getbuildid)                                         | `Promise<string>`   |  ✅  |   ✅    |   ✅     | ❌   |   ✅     |
+| [getBatteryLevel()](#getbatterylevel)                               | `Promise<number>`   |  ✅  |   ✅    |   ✅     | ✅   |   ✅     |
+| [getBootloader()](#getbootloader)                                   | `Promise<string>`   |  ❌  |   ✅    |   ❌     | ❌   |   ❌     |
+| [getBrand()](#getbrand)                                             | `string`            |  ✅  |   ✅    |   ✅     | ❌   |   ✅     |
+| [getBuildNumber()](#getbuildnumber)                                 | `string`            |  ✅  |   ✅    |   ✅     | ❌   |   ✅     |
+| [getBundleId()](#getbundleid)                                       | `string`            |  ✅  |   ✅    |   ✅     | ❌   |   ✅     |
+| [isCameraPresent()](#iscamerapresent)                               | `Promise<boolean>`  |  ❌  |   ✅    |   ✅     | ✅   |   ❌     |
+| [getCarrier()](#getcarrier)                                         | `Promise<string>`   |  ✅  |   ✅    |   ❌     | ❌   |   ❌     |
+| [getCodename()](#getcodename)                                       | `Promise<string>`   |  ❌  |   ✅    |   ❌     | ❌   |   ❌     |
+| [getDevice()](#getdevice)                                           | `Promise<string>`   |  ❌  |   ✅    |   ❌     | ❌   |   ❌     |
+| [getDeviceId()](#getdeviceid)                                       | `string`            |  ✅  |   ✅    |   ✅     | ❌   |   ✅     |
+| [getDeviceType()](#getDeviceType)                                   | `string`            |  ✅  |   ✅    |   ❌     | ❌   |   ✅     |
+| [getDisplay()](#getdisplay)                                         | `Promise<string>`   |  ❌  |   ✅    |   ❌     | ❌   |   ❌     |
+| [getDeviceName()](#getdevicename)                                   | `Promise<string>`   |  ✅  |   ✅    |   ✅     | ❌   |   ✅     |
+| [getDeviceToken()](#getdevicetoken)                                 | `Promise<string>`   |  ✅  |   ❌    |   ❌     | ❌   |   ✅     |
+| [getFirstInstallTime()](#getfirstinstalltime)                       | `Promise<number>`   |  ✅  |   ✅    |   ✅     | ❌   |   ✅     |
+| [getFingerprint()](#getfingerprint)                                 | `Promise<string>`   |  ❌  |   ✅    |   ❌     | ❌   |   ❌     |
+| [getFontScale()](#getfontscale)                                     | `Promise<number>`   |  ✅  |   ✅    |   ✅     | ❌   |   ❌     |
+| [getFreeDiskStorage()](#getfreediskstorage)                         | `Promise<number>`   |  ✅  |   ✅    |   ✅     | ✅   |   ✅     |
+| [getFreeDiskStorageOld()](#getfreediskstorageold)                   | `Promise<number>`   |  ✅  |   ✅    |   ✅     | ✅   |   ✅     |
+| [getHardware()](#gethardware)                                       | `Promise<string>`   |  ❌  |   ✅    |   ❌     | ❌   |   ❌     |
+| [getHost()](#gethost)                                               | `Promise<string>`   |  ❌  |   ✅    |   ✅     | ❌   |   ❌     |
+| [getHostNames()](#getHostNames)                                     | `Promise<string[]>` |  ❌  |   ❌    |   ✅     | ❌   |   ❌     |
+| [getIpAddress()](#getipaddress)                                     | `Promise<string>`   |  ✅  |   ✅    |   ✅     | ❌   |   ✅     |
+| [getIncremental()](#getincremental)                                 | `Promise<string>`   |  ❌  |   ✅    |   ❌     | ❌   |   ❌     |
+| [getInstallerPackageName()](#getinstallerpackagename)               | `Promise<string>`   |  ✅  |   ✅    |   ✅     | ❌   |   ✅     |
+| [getInstallReferrer()](#getinstallreferrer)                         | `Promise<string>`   |  ❌  |   ✅    |   ✅     | ✅   |   ❌     |
+| [getInstanceId()](#getinstanceid)                                   | `Promise<string>`   |  ❌  |   ✅    |   ❌     | ❌   |   ❌     |
+| [getLastUpdateTime()](#getlastupdatetime)                           | `Promise<number>`   |  ❌  |   ✅    |   ❌     | ❌   |   ❌     |
+| [getMacAddress()](#getmacaddress)                                   | `Promise<string>`   |  ✅  |   ✅    |   ❌     | ❌   |   ✅     |
+| [getManufacturer()](#getmanufacturer)                               | `Promise<string>`   |  ✅  |   ✅    |   ✅     | ❌   |   ✅     |
+| [getMaxMemory()](#getmaxmemory)                                     | `Promise<number>`   |  ❌  |   ✅    |   ✅     | ✅   |   ❌     |
+| [getModel()](#getmodel)                                             | `string`            |  ✅  |   ✅    |   ✅     | ❌   |   ✅     |
+| [getPowerState()](#getpowerstate)                                   | `Promise<object>`   |  ✅  |   ✅    |   ✅     | ✅   |   ✅     |
+| [getProduct()](#getproduct)                                         | `Promise<string>`   |  ❌  |   ✅    |   ❌     | ❌   |   ❌     |
+| [getPreviewSdkInt()](#getPreviewSdkInt)                             | `Promise<number>`   |  ❌  |   ✅    |   ❌     | ❌   |   ❌     |
+| [getReadableVersion()](#getreadableversion)                         | `string`            |  ✅  |   ✅    |   ✅     | ❌   |   ✅     |
+| [getSerialNumber()](#getserialnumber)                               | `Promise<string>`   |  ❌  |   ✅    |   ✅     | ❌   |   ❌     |
+| [getSecurityPatch()](#getsecuritypatch)                             | `Promise<string>`   |  ❌  |   ✅    |   ❌     | ❌   |   ❌     |
+| [getSystemAvailableFeatures()](#getSystemAvailableFeatures)         | `Promise<string[]>` |  ❌  |   ✅    |   ❌     | ❌   |   ❌     |
+| [getSystemName()](#getsystemname)                                   | `string`            |  ✅  |   ✅    |   ✅     | ❌   |   ✅     |
+| [getSystemVersion()](#getsystemversion)                             | `string`            |  ✅  |   ✅    |   ✅     | ❌   |   ✅     |
+| [getTags()](#gettags)                                               | `Promise<string>`   |  ❌  |   ✅    |   ❌     | ❌   |   ❌     |
+| [getType()](#gettype)                                               | `Promise<string>`   |  ❌  |   ✅    |   ❌     | ❌   |   ❌     |
+| [getTotalDiskCapacity()](#gettotaldiskcapacity)                     | `Promise<number>`   |  ✅  |   ✅    |   ✅     | ✅   |   ✅     |
+| [getTotalDiskCapacityOld()](#gettotaldiskcapacityold)               | `Promise<number>`   |  ✅  |   ✅    |   ✅     | ✅   |   ✅     |
+| [getTotalMemory()](#gettotalmemory)                                 | `Promise<number>`   |  ✅  |   ✅    |   ❌     | ✅   |   ✅     |
+| [getUniqueId()](#getuniqueid)                                       | `Promise<string>`   |  ✅  |   ✅    |   ✅     | ❌   |   ✅     |
+| [getUsedMemory()](#getusedmemory)                                   | `Promise<number>`   |  ✅  |   ✅    |   ✅     | ✅   |   ✅     |
+| [getUserAgent()](#getuseragent)                                     | `Promise<string>`   |  ✅  |   ✅    |   ❌     | ✅   |   ✅     |
+| [getUserAgentSync()](#getuseragent)                                 | `string`            |  ❌  |   ✅    |   ❌     | ✅   |   ❌     |
+| [getVersion()](#getversion)                                         | `string`            |  ✅  |   ✅    |   ✅     | ❌   |   ✅     |
+| [getBrightness()](#getBrightness)                                   | `Promise<number>`   |  ✅  |   ❌    |   ❌     | ❌   |   ❌     |
+| [hasGms()](#hasGms)                                                 | `Promise<boolean>`  |  ❌  |   ✅    |   ❌     | ❌   |   ❌     |
+| [hasHms()](#hasHms)                                                 | `Promise<boolean>`  |  ❌  |   ✅    |   ❌     | ❌   |   ❌     |
+| [hasNotch()](#hasNotch)                                             | `boolean`           |  ✅  |   ✅    |   ✅     | ❌   |   ✅     |
+| [hasDynamicIsland()](#hasDynamicIsland)                             | `boolean`           |  ✅  |   ✅    |   ✅     | ❌   |   ✅     |
+| [hasSystemFeature()](#hassystemfeaturefeature)                      | `Promise<boolean>`  |  ❌  |   ✅    |   ❌     | ❌   |   ❌     |
+| [isAirplaneMode()](#isairplanemode)                                 | `Promise<boolean>`  |  ❌  |   ✅    |   ❌     | ✅   |   ❌     |
+| [isBatteryCharging()](#isbatterycharging)                           | `Promise<boolean>`  |  ✅  |   ✅    |   ✅     | ✅   |   ✅     |
+| [isEmulator()](#isemulator)                                         | `Promise<boolean>`  |  ✅  |   ✅    |   ✅     | ❌   |   ✅     |
+| [isKeyboardConnected()](#iskeyboardconnected)                       | `Promise<bool>`     |  ❌  |   ❌    |   ✅     | ❌   |   ❌     |
+| [isLandscape()](#isLandscape)                                       | `Promise<boolean>`  |  ✅  |   ✅    |   ✅     | ❌   |   ✅     |
+| [isLocationEnabled()](#isLocationEnabled)                           | `Promise<boolean>`  |  ✅  |   ✅    |   ❌     | ✅   |   ✅     |
+| [isMouseConnected()](#ismouseconneted)                              | `Promise<bool>`     |  ❌  |   ❌    |   ✅     | ❌   |   ❌     |
+| [isHeadphonesConnected()](#isHeadphonesConnected)                   | `Promise<boolean>`  |  ✅  |   ✅    |   ❌     | ❌   |   ✅     |
+| [isWiredHeadphonesConnected()](#isWiredHeadphonesConnected)         | `Promise<boolean>`  |  ✅  |   ✅    |   ❌     | ❌   |   ✅     |
+| [isBluetoothHeadphonesConnected()](#isBluetoothHeadphonesConnected) | `Promise<boolean>`  |  ✅  |   ✅    |   ❌     | ❌   |   ✅     |
+| [isPinOrFingerprintSet()](#ispinorfingerprintset)                   | `Promise<boolean>`  |  ✅  |   ✅    |   ✅     | ❌   |   ✅     |
+| [isTablet()](#istablet)                                             | `boolean`           |  ✅  |   ✅    |   ✅     | ❌   |   ✅     |
+| [isLowRamDevice()](#istablet)                                       | `boolean`           |  ❌  |   ✅    |   ❌     | ❌   |   ❌     |
+| [isDisplayZoomed()](#isdisplayzoomed)                               | `boolean`           |  ✅  |   ❌    |   ❌     | ❌   |   ❌     |
+| [isTabletMode()](#istabletmode)                                     | `Promise<bool>`     |  ❌  |   ❌    |   ✅     | ❌   |   ❌     |
+| [supported32BitAbis()](#supported32BitAbis)                         | `Promise<string[]>` |  ❌  |   ✅    |   ❌     | ❌   |   ❌     |
+| [supported64BitAbis()](#supported64BitAbis)                         | `Promise<string[]>` |  ❌  |   ✅    |   ❌     | ❌   |   ❌     |
+| [supportedAbis()](#supportedAbis)                                   | `Promise<string[]>` |  ✅  |   ✅    |   ✅     | ❌   |   ✅     |
+| [syncUniqueId()](#syncuniqueid)                                     | `Promise<string>`   |  ✅  |   ❌    |   ❌     | ❌   |   ✅     |
+| [getSupportedMediaTypeList()](#getSupportedMediaTypeList)           | `Promise<string[]>` |  ❌  |   ✅    |   ❌     | ❌   |   ❌     |
 
 ---
 
@@ -454,7 +460,7 @@ DeviceInfo.getDeviceName().then((deviceName) => {
 });
 ```
 
-This used to require the android.permission.BLUETOOTH but the new implementation in v3 does not need it. You may remove that from your AndroidManifest.xml if you had it for this API.
+This used to require the android.permission.BLUETOOTH but the new implementation in v3 does not need it. You may remove that from your AndroidManifest.xml if you had it for this API. iOS 16 and greater [require entitlements]([url](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_developer_device-information_user-assigned-device-name)) to access user-defined device name, otherwise a generic value is returned (ie. 'iPad', 'iPhone')
 
 ---
 
@@ -666,11 +672,22 @@ DeviceInfo.getInstallReferrer().then((installReferrer) => {
 
 Gets the application instance ID.
 
+This attempts to get an instance ID from these sources, in this order:
+
+- a value under key `instanceId` in SharedPreferences file `react-native-device-info`
+- Firebase IID (if `firebaseBomVersion` or `firebaseIidVersion` is defined in gradle ext - **deprecated**)
+- GMS IID (if `googlePlayServicesIidVersion` or `googlePlayServicesVersion` is defined in gradle ext - **deprecated**)
+- a random UUID generated from java.util.UUID.randomUUID() and stored in SharedPreferences
+
+If you are using the deprecated sources, the instance ID generated is stored in shared preferences so it will be stable during this major version of react-native-device-info.
+
+In a future version of react-native-device-info, the Firebase IID and GMS IID implementations will be removed, and all future values will be the value (if any) stored in SharedPreferences, or a new random UUID that will then be stored and used for that app installation in the future.
+
 #### Examples
 
 ```js
 DeviceInfo.getInstanceId().then((instanceId) => {
-  // Android: ?
+  // Android: da4e0245-5d6c-402a-a07c-0c5349f229e2
 });
 ```
 
@@ -765,25 +782,7 @@ let model = DeviceInfo.getModel();
 
 ### getPhoneNumber()
 
-Gets the device phone number.
-
-#### Examples
-
-```js
-DeviceInfo.getPhoneNumber().then((phoneNumber) => {
-  // Android: null return: no permission, empty string: unprogrammed or empty SIM1, e.g. "+15555215558": normal return value
-});
-```
-
-#### Android Permissions
-
-Please refer to the [Android docs](https://developer.android.com/about/versions/11/privacy/permissions#phone-numbers) for information about which permission you need, depending on which version of Android you are supporting. Read the note below for more information.
-
-#### Notes
-
-> This can return `undefined` in certain cases and should not be relied on. [SO entry on the subject](https://stackoverflow.com/questions/2480288/programmatically-obtain-the-phone-number-of-the-android-phone#answer-2480307).
-
-> If the above permissions do not work, you can try using `android.permission.READ_SMS`. However, this is not in the Android docs. If you are supporting Android 10 and below: [android.permission.READ_PHONE_STATE](https://developer.android.com/reference/android/Manifest.permission.html#READ_PHONE_STATE). If you are supporting Android 11 and up: [android.permission.READ_SMS](https://developer.android.com/reference/android/Manifest.permission.html#READ_SMS)
+The getPhoneNumber() has been removed. This method uses deprecated Android APIs. You can use react-native-sim-cards-manager to get the phone number.
 
 ---
 
@@ -862,8 +861,11 @@ DeviceInfo.getSerialNumber().then((serialNumber) => {
   // Windows: ? (a serial number, if your app has the "capability smbios")
 });
 ```
+
 ## Notes
+
 ### capability smbios
+
 If you want to use this method in windows, you have to add smbios capability in your aplication. Please following this [documentation](https://docs.microsoft.com/en-us/windows/win32/sysinfo/access-smbios-information-from-a-universal-windows-app) for add the capability in your manifest file.
 
 ---
@@ -1007,7 +1009,7 @@ DeviceInfo.getTotalMemory().then((totalMemory) => {
 
 ### getUniqueId()
 
-*This identifier is considered sensitive information in some app stores (e.g. Huawei or Google Play) and may lead to your app being removed or rejected, if used without user consent or for unapproved purposes. Refer to store policies for more information (see notes below).*
+_This identifier is considered sensitive information in some app stores (e.g. Huawei or Google Play) and may lead to your app being removed or rejected, if used without user consent or for unapproved purposes. Refer to store policies for more information (see notes below)._
 
 Gets the device unique ID.
 On Android it is currently identical to `getAndroidId()` in this module.
@@ -1075,6 +1077,16 @@ DeviceInfo.getUsedMemory().then((usedMemory) => {
 
 ---
 
+### getSupportedMediaTypeList()
+This method gets the list of supported media codecs.
+#### Examples
+```js
+DeviceInfo.getSupportedMediaTypeList().then((string[]) => {
+  // ["audio/mpeg", "audio/mp4a-latm", "audio/mp4a-latm", "audio/mp4a-latm", "audio/mp4a-latm", "video/avc", "video/3gpp", "video/hevc", "video/mp4v-es", "video/av01", "video/avc", "video/avc", "video/avc", "video/avc"]
+});
+```
+---
+
 ### getUserAgent()
 
 Gets the device User Agent.
@@ -1085,7 +1097,7 @@ Gets the device User Agent.
 DeviceInfo.getUserAgent().then((userAgent) => {
   // iOS: "Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143"
   // tvOS: not available
-  // Android: ?
+  // Android: "Mozilla/5.0 (Linux; Android 12; sdk_gphone64_arm64 Build/SE1A.220630.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/91.0.4472.114 Mobile Safari/537.36"
   // Windows: ?
 });
 ```
@@ -1196,6 +1208,32 @@ let isTablet = DeviceInfo.isTablet();
 
 ---
 
+### isLowRamDevice()
+
+Tells if the device has low RAM.
+
+#### Examples
+
+```js
+let isLowRamDevice = DeviceInfo.isLowRamDevice();
+// true
+```
+
+---
+
+### isDisplayZoomed()
+
+Tells if the user changed Display Zoom to Zoomed
+
+#### Examples
+
+```js
+let isDisplayZoomed = DeviceInfo.isDisplayZoomed();
+// true
+```
+
+---
+
 ### isTabletMode()
 
 Tells if the device is in tablet mode.
@@ -1299,6 +1337,7 @@ Returns the device's type as a string, which will be one of:
 - `Tv`
 - `Desktop`
 - `GamingConsole`
+- `Headset`
 - `unknown`
 
 #### Examples
@@ -1402,6 +1441,30 @@ DeviceInfo.isHeadphonesConnected().then((enabled) => {
 });
 ```
 
+### isWiredHeadphonesConnected()
+
+Tells if the device is connected to wired headset
+
+#### Examples
+
+```js
+DeviceInfo.isWiredHeadphonesConnected().then((enabled) => {
+  // true or false
+});
+```
+
+### isBluetoothHeadphonesConnected()
+
+Tells if the device is connected to bluetooth headset
+
+#### Examples
+
+```js
+DeviceInfo.isBluetoothHeadphonesConnected().then((enabled) => {
+  // true or false
+});
+```
+
 ### getAvailableLocationProviders()
 
 Returns an object of **platform-specfic** location providers/servcies, with `boolean` value whether or not they are currently available.
@@ -1447,7 +1510,7 @@ DeviceInfo.getBrightness().then((brightness) => {
 
 ## Hooks & Events
 
-Currently iOS & Android only (web support for battery/charging-related APIs).
+Supported in Windows, iOS & Android (web support for battery/charging-related APIs).
 
 ### useBatteryLevel or RNDeviceInfo_batteryLevelDidChange
 
@@ -1476,13 +1539,14 @@ deviceInfoEmitter.addListener('RNDeviceInfo_batteryLevelDidChange', (level) => {
 
 ### useBatteryLevelIsLow or RNDeviceInfo_batteryLevelIsLow
 
-Fired when the battery drops is considered low
+Fired when the battery level is considered low (multiple times untill charged)
 
 | Platform | Percentage |
 | -------- | ---------- |
 | iOS      | 20         |
 | Android  | 15         |
 | Web      | 20         |
+| Windows  | 20         |
 
 #### Examples
 
@@ -1507,14 +1571,19 @@ deviceInfoEmitter.addListener('RNDeviceInfo_batteryLevelIsLow', (level) => {
 
 ### usePowerState or RNDeviceInfo_powerStateDidChange
 
-Fired when the battery state changes, for example when the device enters charging mode or is unplugged.
+Fired when the battery state changes or device enters in the power saving mode, for example when the device enters charging mode or is unplugged.
 
 #### Examples
 
 ```js
 import { usePowerState } from 'react-native-device-info';
 
-const powerState = usePowerState(); // 'charging'
+const powerState = usePowerState();
+  // {
+  //   batteryLevel: 0.759999,
+  //   batteryState: 'unplugged',
+  //   lowPowerMode: false,
+  // }
 
 <Text>{powerState}</Text>;
 ```
@@ -1523,8 +1592,12 @@ const powerState = usePowerState(); // 'charging'
 import { NativeEventEmitter, NativeModules } from 'react-native'
 const deviceInfoEmitter = new NativeEventEmitter(NativeModules.RNDeviceInfo)
 
-deviceInfoEmitter.addListener('RNDeviceInfo_powerStateDidChange', { batteryState } => {
-  // 'charging'
+deviceInfoEmitter.addListener('RNDeviceInfo_powerStateDidChange', { powerState } => {
+  // {
+  //   batteryLevel: 0.759999,
+  //   batteryState: 'unplugged',
+  //   lowPowerMode: false,
+  // }
 });
 ```
 
@@ -1622,6 +1695,42 @@ This hook subscribes to the event, `RNDeviceInfo_headphoneConnectionDidChange` ,
 import { useIsHeadphonesConnected } from 'react-native-device-info';
 
 const { loading, result } = useIsHeadphonesConnected(); // { loading: true, result: false}
+
+<Text>{loading ? 'loading...' : result}</Text>;
+```
+
+---
+
+### useIsWiredHeadphonesConnected
+
+Tells if the device is connected to wired headset.
+
+This hook subscribes to the event, `RNDeviceInfo_headphoneWiredConnectionDidChange` , and updates the `result` field accordingly.
+
+#### Example
+
+```jsx
+import { useIsWiredHeadphonesConnected } from 'react-native-device-info';
+
+const { loading, result } = useIsWiredHeadphonesConnected(); // { loading: true, result: false}
+
+<Text>{loading ? 'loading...' : result}</Text>;
+```
+
+---
+
+### useIsBluetoothHeadphonesConnected
+
+Tells if the device is connected to bluetooth headphones.
+
+This hook subscribes to the event, `RNDeviceInfo_headphoneBluetoothConnectionDidChange` , and updates the `result` field accordingly.
+
+#### Example
+
+```jsx
+import { useIsBluetoothHeadphonesConnected } from 'react-native-device-info';
+
+const { loading, result } = useIsBluetoothHeadphonesConnected(); // { loading: true, result: false}
 
 <Text>{loading ? 'loading...' : result}</Text>;
 ```
@@ -1785,8 +1894,8 @@ Checkout the example project for more information.
 Some of the APIs (like getBatteryState) will throw warnings in certain conditions like on tvOS or the iOS emulator. This won't be visible in production but even in development it may be irritating. It is useful to have the warnings because these devices return no state, and that can be surprising, leading to github support issues. The warnings is intended to educate you as a developer. If the warnings are troublesome you may try this in your code to suppress them:
 
 ```javascript
-import { YellowBox } from 'react-native';
-YellowBox.ignoreWarnings(['Battery state']);
+import { LogBox } from 'react-native';
+LogBox.ignoreLogs(['Battery state']);
 ```
 
 </details>

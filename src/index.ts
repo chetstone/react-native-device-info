@@ -241,7 +241,7 @@ export const getUserAgent = () =>
 
 export const getUserAgentSync = () =>
   getSupportedPlatformInfoSync({
-    memoKey: 'userAgent',
+    memoKey: 'userAgentSync',
     defaultValue: 'unknown',
     supportedPlatforms: ['android', 'web'],
     getter: () => RNDeviceInfo.getUserAgentSync(),
@@ -296,10 +296,18 @@ export const [getHardware, getHardwareSync] = getSupportedPlatformInfoFunctions(
 
 export const [getHost, getHostSync] = getSupportedPlatformInfoFunctions({
   memoKey: 'host',
-  supportedPlatforms: ['android'],
+  supportedPlatforms: ['android', 'windows'],
   getter: () => RNDeviceInfo.getHost(),
   syncGetter: () => RNDeviceInfo.getHostSync(),
   defaultValue: 'unknown',
+});
+
+export const [getHostNames, getHostNamesSync] = getSupportedPlatformInfoFunctions({
+  memoKey: 'hostNames',
+  supportedPlatforms: ['windows'],
+  getter: () => RNDeviceInfo.getHostNames(),
+  syncGetter: () => RNDeviceInfo.getHostNamesSync(),
+  defaultValue: [] as string[],
 });
 
 export const [getProduct, getProductSync] = getSupportedPlatformInfoFunctions({
@@ -382,6 +390,22 @@ export const isTablet = () =>
     getter: () => RNDeviceInfo.isTablet,
   });
 
+export const isLowRamDevice = () =>
+  getSupportedPlatformInfoSync({
+    defaultValue: false,
+    supportedPlatforms: ['android'],
+    memoKey: 'lowRam',
+    getter: () => RNDeviceInfo.isLowRamDevice,
+  });
+
+export const isDisplayZoomed = () =>
+  getSupportedPlatformInfoSync({
+    defaultValue: false,
+    supportedPlatforms: ['ios'],
+    memoKey: 'zoomed',
+    getter: () => RNDeviceInfo.isDisplayZoomed,
+  });
+
 export const [isPinOrFingerprintSet, isPinOrFingerprintSetSync] = getSupportedPlatformInfoFunctions(
   {
     supportedPlatforms: ['android', 'ios', 'windows'],
@@ -457,13 +481,6 @@ export const [getLastUpdateTime, getLastUpdateTimeSync] = getSupportedPlatformIn
   getter: () => RNDeviceInfo.getLastUpdateTime(),
   syncGetter: () => RNDeviceInfo.getLastUpdateTimeSync(),
   defaultValue: -1,
-});
-
-export const [getPhoneNumber, getPhoneNumberSync] = getSupportedPlatformInfoFunctions({
-  supportedPlatforms: ['android'],
-  getter: () => RNDeviceInfo.getPhoneNumber(),
-  syncGetter: () => RNDeviceInfo.getPhoneNumberSync(),
-  defaultValue: 'unknown',
 });
 
 export const [getCarrier, getCarrierSync] = getSupportedPlatformInfoFunctions({
@@ -675,6 +692,26 @@ export const [isHeadphonesConnected, isHeadphonesConnectedSync] = getSupportedPl
   }
 );
 
+export const [
+  isWiredHeadphonesConnected,
+  isWiredHeadphonesConnectedSync,
+] = getSupportedPlatformInfoFunctions({
+  supportedPlatforms: ['android', 'ios'],
+  getter: () => RNDeviceInfo.isWiredHeadphonesConnected(),
+  syncGetter: () => RNDeviceInfo.isWiredHeadphonesConnectedSync(),
+  defaultValue: false,
+});
+
+export const [
+  isBluetoothHeadphonesConnected,
+  isBluetoothHeadphonesConnectedSync,
+] = getSupportedPlatformInfoFunctions({
+  supportedPlatforms: ['android', 'ios'],
+  getter: () => RNDeviceInfo.isBluetoothHeadphonesConnected(),
+  syncGetter: () => RNDeviceInfo.isBluetoothHeadphonesConnectedSync(),
+  defaultValue: false,
+});
+
 export const [isMouseConnected, isMouseConnectedSync] = getSupportedPlatformInfoFunctions({
   supportedPlatforms: ['windows'],
   getter: () => RNDeviceInfo.isMouseConnected(),
@@ -687,6 +724,16 @@ export const [isKeyboardConnected, isKeyboardConnectedSync] = getSupportedPlatfo
   getter: () => RNDeviceInfo.isKeyboardConnected(),
   syncGetter: () => RNDeviceInfo.isKeyboardConnectedSync(),
   defaultValue: false,
+});
+
+export const [
+  getSupportedMediaTypeList,
+  getSupportedMediaTypeListSync,
+] = getSupportedPlatformInfoFunctions({
+  supportedPlatforms: ['android'],
+  getter: () => RNDeviceInfo.getSupportedMediaTypeList(),
+  syncGetter: () => RNDeviceInfo.getSupportedMediaTypeListSync(),
+  defaultValue: [],
 });
 
 export const isTabletMode = () =>
@@ -807,6 +854,22 @@ export function useIsHeadphonesConnected(): AsyncHookResult<boolean> {
   return useOnEvent('RNDeviceInfo_headphoneConnectionDidChange', isHeadphonesConnected, false);
 }
 
+export function useIsWiredHeadphonesConnected(): AsyncHookResult<boolean> {
+  return useOnEvent(
+    'RNDeviceInfo_headphoneWiredConnectionDidChange',
+    isWiredHeadphonesConnected,
+    false
+  );
+}
+
+export function useIsBluetoothHeadphonesConnected(): AsyncHookResult<boolean> {
+  return useOnEvent(
+    'RNDeviceInfo_headphoneBluetoothConnectionDidChange',
+    isBluetoothHeadphonesConnected,
+    false
+  );
+}
+
 export function useFirstInstallTime(): AsyncHookResult<number> {
   return useOnMount(getFirstInstallTime, -1);
 }
@@ -856,7 +919,7 @@ export function useBrightness(): number | null {
 
 export type { AsyncHookResult, DeviceType, LocationProviderInfo, PowerState };
 
-const deviceInfoModule: DeviceInfoModule = {
+const DeviceInfo: DeviceInfoModule = {
   getAndroidId,
   getAndroidIdSync,
   getApiLevel,
@@ -903,6 +966,8 @@ const deviceInfoModule: DeviceInfoModule = {
   getHardwareSync,
   getHost,
   getHostSync,
+  getHostNames,
+  getHostNamesSync,
   getIncremental,
   getIncrementalSync,
   getInstallerPackageName,
@@ -922,8 +987,6 @@ const deviceInfoModule: DeviceInfoModule = {
   getMaxMemory,
   getMaxMemorySync,
   getModel,
-  getPhoneNumber,
-  getPhoneNumberSync,
   getPowerState,
   getPowerStateSync,
   getPreviewSdkInt,
@@ -976,6 +1039,10 @@ const deviceInfoModule: DeviceInfoModule = {
   isEmulatorSync,
   isHeadphonesConnected,
   isHeadphonesConnectedSync,
+  isWiredHeadphonesConnected,
+  isWiredHeadphonesConnectedSync,
+  isBluetoothHeadphonesConnected,
+  isBluetoothHeadphonesConnectedSync,
   isLandscape,
   isLandscapeSync,
   isLocationEnabled,
@@ -990,6 +1057,8 @@ const deviceInfoModule: DeviceInfoModule = {
   isTablet,
   isVibrator,
   isVibratorSync,
+  isLowRamDevice,
+  isDisplayZoomed,
   supported32BitAbis,
   supported32BitAbisSync,
   supported64BitAbis,
@@ -1006,7 +1075,11 @@ const deviceInfoModule: DeviceInfoModule = {
   usePowerState,
   useManufacturer,
   useIsHeadphonesConnected,
+  useIsWiredHeadphonesConnected,
+  useIsBluetoothHeadphonesConnected,
   useBrightness,
+  getSupportedMediaTypeList,
+  getSupportedMediaTypeListSync,
 };
 
-export default deviceInfoModule;
+export default DeviceInfo;

@@ -13,6 +13,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.FeatureInfo;
 import android.location.LocationManager;
 import android.media.AudioManager;
+import android.media.MediaCodecInfo;
+import android.media.MediaCodecList;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiInfo;
 import android.os.Build;
@@ -25,6 +27,8 @@ import android.os.Debug;
 import android.os.Process;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
+import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.InputMethodInfo;
 import android.webkit.WebSettings;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -63,6 +67,7 @@ import java.util.Map;
 
 import javax.annotation.Nonnull;
 
+import static android.content.Context.ACTIVITY_SERVICE;
 import static android.os.BatteryManager.BATTERY_STATUS_CHARGING;
 import static android.os.BatteryManager.BATTERY_STATUS_FULL;
 import static android.provider.Settings.Secure.getString;
@@ -74,7 +79,10 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
   private final DeviceIdResolver deviceIdResolver;
   private BroadcastReceiver receiver;
   private BroadcastReceiver headphoneConnectionReceiver;
+  private BroadcastReceiver headphoneWiredConnectionReceiver;
+  private BroadcastReceiver headphoneBluetoothConnectionReceiver;
   private RNInstallReferrerClient installReferrerClient;
+  private InputMethodManager inputMethodManager;
 
   private double mLastBatteryLevel = -1;
   private String mLastBatteryState = "";
@@ -89,6 +97,7 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
     this.deviceTypeResolver = new DeviceTypeResolver(reactContext);
     this.deviceIdResolver = new DeviceIdResolver(reactContext);
     this.installReferrerClient = new RNInstallReferrerClient(reactContext.getBaseContext());
+    this.inputMethodManager = (InputMethodManager) reactContext.getSystemService(Context.INPUT_METHOD_SERVICE);
   }
 
   @Override
@@ -132,11 +141,12 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
       }
     };
 
-    getReactApplicationContext().registerReceiver(receiver, filter);
-    initializeHeadphoneConnectionReceiver();
+    registerReceiver(getReactApplicationContext(), receiver, filter);
+    initializeHeadphoneConnectionReceivers();
   }
 
-  private void initializeHeadphoneConnectionReceiver() {
+  private void initializeHeadphoneConnectionReceivers() {
+    // 1. Filter for both wired headset and bluetooth headphones
     IntentFilter filter = new IntentFilter();
     filter.addAction(AudioManager.ACTION_HEADSET_PLUG);
     filter.addAction(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED);
@@ -149,14 +159,43 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
       }
     };
 
-    getReactApplicationContext().registerReceiver(headphoneConnectionReceiver, filter);
-  }
+    registerReceiver(getReactApplicationContext(), headphoneConnectionReceiver, filter);
 
+    // 2. Filter for wired headset
+    IntentFilter filterWired = new IntentFilter();
+    filterWired.addAction(AudioManager.ACTION_HEADSET_PLUG);
+
+    headphoneWiredConnectionReceiver = new BroadcastReceiver() {
+      @Override
+      public void onReceive(Context context, Intent intent) {
+        boolean isConnected = isWiredHeadphonesConnectedSync();
+        sendEvent(getReactApplicationContext(), "RNDeviceInfo_headphoneWiredConnectionDidChange", isConnected);
+      }
+    };
+
+    registerReceiver(getReactApplicationContext(), headphoneWiredConnectionReceiver, filter);
+
+    // 3. Filter for bluetooth headphones
+    IntentFilter filterBluetooth = new IntentFilter();
+    filterBluetooth.addAction(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED);
+
+    headphoneBluetoothConnectionReceiver = new BroadcastReceiver() {
+      @Override
+      public void onReceive(Context context, Intent intent) {
+        boolean isConnected = isBluetoothHeadphonesConnectedSync();
+        sendEvent(getReactApplicationContext(), "RNDeviceInfo_headphoneBluetoothConnectionDidChange", isConnected);
+      }
+    };
+
+    registerReceiver(getReactApplicationContext(), headphoneBluetoothConnectionReceiver, filter);
+  }
 
   @Override
   public void onCatalystInstanceDestroy() {
     getReactApplicationContext().unregisterReceiver(receiver);
     getReactApplicationContext().unregisterReceiver(headphoneConnectionReceiver);
+    getReactApplicationContext().unregisterReceiver(headphoneWiredConnectionReceiver);
+    getReactApplicationContext().unregisterReceiver(headphoneBluetoothConnectionReceiver);
   }
 
 
@@ -166,6 +205,10 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
     return NAME;
   }
 
+  public static SharedPreferences getRNDISharedPreferences(Context context) {
+    return context.getSharedPreferences("react-native-device-info", Context.MODE_PRIVATE);
+  }
+
   @SuppressLint("MissingPermission")
   private WifiInfo getWifiInfo() {
     WifiManager manager = (WifiManager) getReactApplicationContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
@@ -173,6 +216,16 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
       return manager.getConnectionInfo();
     }
     return null;
+  }
+
+  @Nonnull
+  private Boolean isLowRamDevice() {
+    ActivityManager am = (ActivityManager) getReactApplicationContext().getSystemService(ACTIVITY_SERVICE);
+    boolean isLowRamDevice = false;
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+      isLowRamDevice = am.isLowRamDevice();
+    }
+    return isLowRamDevice;
   }
 
   @Override
@@ -198,6 +251,7 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
     constants.put("appVersion", appVersion);
     constants.put("buildNumber", buildNumber);
     constants.put("isTablet", deviceTypeResolver.isTablet());
+    constants.put("isLowRamDevice", isLowRamDevice());
     constants.put("appName", appName);
     constants.put("brand", Build.BRAND);
     constants.put("model", Build.MODEL);
@@ -246,7 +300,8 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
             || Build.HARDWARE.toLowerCase(Locale.ROOT).contains("nox")
             || Build.PRODUCT.toLowerCase(Locale.ROOT).contains("nox")
             || Build.SERIAL.toLowerCase(Locale.ROOT).contains("nox")
-            || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"));
+            || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic")
+            || this.hasKeyboard("memuime"));
   }
 
   @ReactMethod(isBlockingSynchronousMethod = true)
@@ -468,7 +523,7 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
 
   @ReactMethod(isBlockingSynchronousMethod = true)
   public double getUsedMemorySync() {
-    ActivityManager actMgr = (ActivityManager) getReactApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
+    ActivityManager actMgr = (ActivityManager) getReactApplicationContext().getSystemService(ACTIVITY_SERVICE);
     if (actMgr != null) {
       int pid = android.os.Process.myPid();
       android.os.Debug.MemoryInfo[] memInfos = actMgr.getProcessMemoryInfo(new int[]{pid});
@@ -620,6 +675,22 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
   public void isHeadphonesConnected(Promise p) {p.resolve(isHeadphonesConnectedSync());}
 
   @ReactMethod(isBlockingSynchronousMethod = true)
+  public boolean isWiredHeadphonesConnectedSync() {
+    AudioManager audioManager = (AudioManager)getReactApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+    return audioManager.isWiredHeadsetOn();
+  }
+  @ReactMethod
+  public void isWiredHeadphonesConnected(Promise p) {p.resolve(isWiredHeadphonesConnectedSync());}
+
+  @ReactMethod(isBlockingSynchronousMethod = true)
+  public boolean isBluetoothHeadphonesConnectedSync() {
+    AudioManager audioManager = (AudioManager)getReactApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+    return audioManager.isBluetoothA2dpOn();
+  }
+  @ReactMethod
+  public void isBluetoothHeadphonesConnected(Promise p) {p.resolve(isBluetoothHeadphonesConnectedSync());}
+
+  @ReactMethod(isBlockingSynchronousMethod = true)
   public WritableMap getAvailableLocationProvidersSync() {
     LocationManager mLocationManager = (LocationManager) getReactApplicationContext().getSystemService(Context.LOCATION_SERVICE);
     WritableMap providersAvailability = Arguments.createMap();
@@ -639,7 +710,7 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
 
   @ReactMethod(isBlockingSynchronousMethod = true)
   public String getInstallReferrerSync() {
-    SharedPreferences sharedPref = getReactApplicationContext().getSharedPreferences("react-native-device-info", Context.MODE_PRIVATE);
+    SharedPreferences sharedPref = getRNDISharedPreferences(getReactApplicationContext());
     return sharedPref.getString("installReferrer", Build.UNKNOWN);
   }
   @ReactMethod
@@ -824,7 +895,7 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
 
   @ReactMethod(isBlockingSynchronousMethod = true)
   public double getTotalMemorySync() {
-    ActivityManager actMgr = (ActivityManager) getReactApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
+    ActivityManager actMgr = (ActivityManager) getReactApplicationContext().getSystemService(ACTIVITY_SERVICE);
     ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
     if (actMgr != null) {
       actMgr.getMemoryInfo(memInfo);
@@ -889,29 +960,6 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
   }
   @ReactMethod
   public void getUserAgent(Promise p) { p.resolve(getUserAgentSync()); }
-
-  @SuppressLint({"HardwareIds", "MissingPermission"})
-  @ReactMethod(isBlockingSynchronousMethod = true)
-  public String getPhoneNumberSync() {
-    if (getReactApplicationContext() != null &&
-            (getReactApplicationContext().checkCallingOrSelfPermission(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED ||
-                    (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && getReactApplicationContext().checkCallingOrSelfPermission(Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED) ||
-                    (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && getReactApplicationContext().checkCallingOrSelfPermission(Manifest.permission.READ_PHONE_NUMBERS) == PackageManager.PERMISSION_GRANTED))) {
-      TelephonyManager telMgr = (TelephonyManager) getReactApplicationContext().getSystemService(Context.TELEPHONY_SERVICE);
-      if (telMgr != null) {
-        try {
-          return telMgr.getLine1Number();
-        } catch (SecurityException e) {
-          System.err.println("getLine1Number called with permission, but threw anyway: " + e.getMessage());
-        }
-      } else {
-        System.err.println("Unable to getPhoneNumber. TelephonyManager was null");
-      }
-    }
-    return "unknown";
-  }
-  @ReactMethod
-  public void getPhoneNumber(Promise p) { p.resolve(getPhoneNumberSync()); }
 
   @ReactMethod(isBlockingSynchronousMethod = true)
   public WritableArray getSupportedAbisSync() {
@@ -1005,5 +1053,47 @@ public class RNDeviceModule extends ReactContextBaseJavaModule {
     reactContext
             .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
             .emit(eventName, data);
+  }
+
+  @ReactMethod(isBlockingSynchronousMethod = true)
+  public WritableArray getSupportedMediaTypeListSync() {
+    WritableArray writableArray = new WritableNativeArray();
+    for (int i = 0; i < MediaCodecList.getCodecCount(); i++) {
+      MediaCodecInfo mediaCodecInfo = MediaCodecList.getCodecInfoAt(i);
+      String[] supportedTypes = mediaCodecInfo.getSupportedTypes();
+      for (int j = 0; j < supportedTypes.length; j++) {
+        writableArray.pushString(supportedTypes[j]);
+      }
+    }
+    return writableArray;
+
+  }
+
+  @ReactMethod
+  public void getSupportedMediaTypeList(Promise promise) {
+    promise.resolve(getSupportedMediaTypeListSync());
+  }
+
+  @SuppressLint("UnspecifiedRegisterReceiverFlag")
+  private void registerReceiver(Context context, BroadcastReceiver receiver, IntentFilter filter) {
+    if (Build.VERSION.SDK_INT >= 34 && context.getApplicationInfo().targetSdkVersion >= 34) {
+      context.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED);
+    } else {
+      context.registerReceiver(receiver, filter);
+    }
+  }
+
+  private boolean hasKeyboard(String name) {
+    List<InputMethodInfo> inputMethodList = this.inputMethodManager.getEnabledInputMethodList();
+    if (inputMethodList != null && !inputMethodList.isEmpty()) {
+      for (InputMethodInfo inputMethodInfo : inputMethodList) {
+        String serviceName = inputMethodInfo.getServiceName().toLowerCase();
+        String id = inputMethodInfo.getId().toLowerCase();
+        if (serviceName.contains(name.toLowerCase()) || id.contains(name.toLowerCase())) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }

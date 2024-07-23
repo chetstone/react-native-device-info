@@ -64,7 +64,6 @@ const stringFnNames = [
   'getSecurityPatch',
   'getCodename',
   'getIncremental',
-  'getPhoneNumber',
   'getCarrier',
   'getInstallReferrer',
 ];
@@ -83,6 +82,8 @@ const booleanFnNames = [
   'hasSystemFeature',
   'isLocationEnabled',
   'isHeadphonesConnected',
+  'isWiredHeadphonesConnected',
+  'isBluetoothHeadphonesConnected',
 ];
 for (const name of booleanFnNames) {
   RNDeviceInfo[name] = booleanFnAsync();

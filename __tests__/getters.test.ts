@@ -46,7 +46,6 @@ const nonMemoizedStringGetters = [
   'getMacAddress',
   'getIpAddress',
   'getDeviceName',
-  'getPhoneNumber',
   'getCarrier',
 ].map(makeTable);
 
@@ -507,6 +506,8 @@ const nonMemoizedBooleanGetters = [
   'isAirplaneMode',
   'isLocationEnabled',
   'isHeadphonesConnected',
+  'isWiredHeadphonesConnected',
+  'isBluetoothHeadphonesConnected',
 ].map(makeTable);
 
 describe('boolean getters', () => {

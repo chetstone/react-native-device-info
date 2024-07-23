@@ -33,6 +33,8 @@ import {
   useHasSystemFeature,
   useIsEmulator,
   useIsHeadphonesConnected,
+  useIsWiredHeadphonesConnected,
+  useIsBluetoothHeadphonesConnected,
   useBrightness,
 } from 'react-native-device-info';
 
@@ -46,6 +48,8 @@ const FunctionalComponent = () => {
   const hasSystemFeature = useHasSystemFeature('amazon.hardware.fire_tv');
   const isEmulator = useIsEmulator();
   const isHeadphonesConnected = useIsHeadphonesConnected();
+  const isWiredHeadphonesConnected = useIsWiredHeadphonesConnected();
+  const isBluetoothHeadphonesConnected = useIsBluetoothHeadphonesConnected();
   const brightness = useBrightness();
   const deviceJSON = {
     batteryLevel,
@@ -57,6 +61,8 @@ const FunctionalComponent = () => {
     hasSystemFeature,
     isEmulator,
     isHeadphonesConnected,
+    isWiredHeadphonesConnected,
+    isBluetoothHeadphonesConnected,
     brightness,
   };
 
@@ -117,6 +123,8 @@ export default class App extends Component {
     deviceJSON.readableVersion = DeviceInfo.getReadableVersion();
     deviceJSON.buildNumber = DeviceInfo.getBuildNumber();
     deviceJSON.isTablet = DeviceInfo.isTablet();
+    deviceJSON.isLowRamDevice = DeviceInfo.isLowRamDevice();
+    deviceJSON.isDisplayZoomed = DeviceInfo.isDisplayZoomed();
     deviceJSON.appName = DeviceInfo.getApplicationName();
     deviceJSON.brand = DeviceInfo.getBrand();
     deviceJSON.model = DeviceInfo.getModel();
@@ -147,7 +155,6 @@ export default class App extends Component {
     deviceJSON.androidId = DeviceInfo.getAndroidIdSync();
     deviceJSON.IpAddress = DeviceInfo.getIpAddressSync();
     deviceJSON.MacAddress = DeviceInfo.getMacAddressSync(); // needs android.permission.ACCESS_WIFI_STATE
-    deviceJSON.phoneNumber = DeviceInfo.getPhoneNumberSync(); // needs android.permission.READ_PHONE_STATE
     deviceJSON.ApiLevel = DeviceInfo.getApiLevelSync();
     deviceJSON.carrier = DeviceInfo.getCarrierSync();
     deviceJSON.totalMemory = DeviceInfo.getTotalMemorySync();
@@ -169,6 +176,8 @@ export default class App extends Component {
     deviceJSON.powerState = DeviceInfo.getPowerStateSync();
     deviceJSON.isLocationEnabled = DeviceInfo.isLocationEnabledSync();
     deviceJSON.headphones = DeviceInfo.isHeadphonesConnectedSync();
+    deviceJSON.headphonesWired = DeviceInfo.isWiredHeadphonesConnectedSync();
+    deviceJSON.headphonesBluetooth = DeviceInfo.isBluetoothHeadphonesConnectedSync();
     deviceJSON.getAvailableLocationProviders = DeviceInfo.getAvailableLocationProvidersSync();
     deviceJSON.bootloader = DeviceInfo.getBootloaderSync();
     deviceJSON.device = DeviceInfo.getDeviceSync();
@@ -176,6 +185,7 @@ export default class App extends Component {
     deviceJSON.fingerprint = DeviceInfo.getFingerprintSync();
     deviceJSON.hardware = DeviceInfo.getHardwareSync();
     deviceJSON.host = DeviceInfo.getHostSync();
+    deviceJSON.hostNames = DeviceInfo.getHostNamesSync();
     deviceJSON.product = DeviceInfo.getProductSync();
     deviceJSON.tags = DeviceInfo.getTagsSync();
     deviceJSON.type = DeviceInfo.getTypeSync();
@@ -191,6 +201,7 @@ export default class App extends Component {
     deviceJSON.hasHms = DeviceInfo.hasHmsSync();
     deviceJSON.isMouseConnected = DeviceInfo.isMouseConnectedSync();
     deviceJSON.isKeyboardConnected = DeviceInfo.isKeyboardConnectedSync();
+    deviceJSON.getSupportedMediaTypeListSync = DeviceInfo.getSupportedMediaTypeListSync();
 
     return deviceJSON;
   }
@@ -220,7 +231,6 @@ export default class App extends Component {
       deviceJSON.androidId = await DeviceInfo.getAndroidId();
       deviceJSON.IpAddress = await DeviceInfo.getIpAddress();
       deviceJSON.MacAddress = await DeviceInfo.getMacAddress(); // needs android.permission.ACCESS_WIFI_STATE
-      deviceJSON.phoneNumber = await DeviceInfo.getPhoneNumber(); // needs android.permission.READ_PHONE_STATE
       deviceJSON.ApiLevel = await DeviceInfo.getApiLevel();
       deviceJSON.carrier = await DeviceInfo.getCarrier();
       deviceJSON.totalMemory = await DeviceInfo.getTotalMemory();
@@ -242,6 +252,8 @@ export default class App extends Component {
       deviceJSON.powerState = await DeviceInfo.getPowerState();
       deviceJSON.isLocationEnabled = await DeviceInfo.isLocationEnabled();
       deviceJSON.headphones = await DeviceInfo.isHeadphonesConnected();
+      deviceJSON.headphonesWired = await DeviceInfo.isWiredHeadphonesConnected();
+      deviceJSON.headphonesBluetooth = await DeviceInfo.isBluetoothHeadphonesConnected();
       deviceJSON.getAvailableLocationProviders = await DeviceInfo.getAvailableLocationProviders();
       deviceJSON.bootloader = await DeviceInfo.getBootloader();
       deviceJSON.device = await DeviceInfo.getDevice();
@@ -249,6 +261,7 @@ export default class App extends Component {
       deviceJSON.fingerprint = await DeviceInfo.getFingerprint();
       deviceJSON.hardware = await DeviceInfo.getHardware();
       deviceJSON.host = await DeviceInfo.getHost();
+      deviceJSON.hostNames = await DeviceInfo.getHostNames();
       deviceJSON.product = await DeviceInfo.getProduct();
       deviceJSON.tags = await DeviceInfo.getTags();
       deviceJSON.type = await DeviceInfo.getType();
@@ -266,6 +279,7 @@ export default class App extends Component {
       deviceJSON.isMouseConnected = await DeviceInfo.isMouseConnected();
       deviceJSON.isKeyboardConnected = await DeviceInfo.isKeyboardConnected();
       deviceJSON.isTabletMode = await DeviceInfo.isTabletMode();
+      deviceJSON.getSupportedMediaTypeList = await DeviceInfo.getSupportedMediaTypeList();
       try {
         deviceJSON.deviceToken = await DeviceInfo.getDeviceToken();
       } catch (e) {

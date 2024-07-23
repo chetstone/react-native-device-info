@@ -27,13 +27,17 @@ typedef NS_ENUM(NSInteger, DeviceType) {
     DeviceTypeTablet,
     DeviceTypeTv,
     DeviceTypeDesktop,
+    DeviceTypeHeadset,
     DeviceTypeUnknown
 };
 
-#define DeviceTypeValues [NSArray arrayWithObjects: @"Handset", @"Tablet", @"Tv", @"Desktop", @"unknown", nil]
+#define DeviceTypeValues [NSArray arrayWithObjects: @"Handset", @"Tablet", @"Tv", @"Desktop", @"Headset", @"unknown", nil]
 
-#if !(TARGET_OS_TV)
+#if (!(TARGET_OS_TV || TARGET_OS_VISION))
 @import CoreTelephony;
+#endif
+
+#if !TARGET_OS_TV
 @import Darwin.sys.sysctl;
 #endif
 
@@ -51,7 +55,7 @@ RCT_EXPORT_MODULE();
 
 - (NSArray<NSString *> *)supportedEvents
 {
-    return @[@"RNDeviceInfo_batteryLevelDidChange", @"RNDeviceInfo_batteryLevelIsLow", @"RNDeviceInfo_powerStateDidChange", @"RNDeviceInfo_headphoneConnectionDidChange", @"RNDeviceInfo_brightnessDidChange"];
+    return @[@"RNDeviceInfo_batteryLevelDidChange", @"RNDeviceInfo_batteryLevelIsLow", @"RNDeviceInfo_powerStateDidChange", @"RNDeviceInfo_headphoneConnectionDidChange", @"RNDeviceInfo_headphoneWiredConnectionDidChange", @"RNDeviceInfo_headphoneBluetoothConnectionDidChange", @"RNDeviceInfo_brightnessDidChange"];
 }
 
 - (NSDictionary *)constantsToExport {
@@ -68,6 +72,7 @@ RCT_EXPORT_MODULE();
          @"brand": @"Apple",
          @"model": [self getModel],
          @"deviceType": [self getDeviceTypeName],
+         @"isDisplayZoomed": @([self isDisplayZoomed]),
      };
 }
 
@@ -95,9 +100,19 @@ RCT_EXPORT_MODULE();
                                                      name:AVAudioSessionRouteChangeNotification
                                                    object: [AVAudioSession sharedInstance]];
         [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(headphoneWiredConnectionDidChange:)
+                                                     name:AVAudioSessionRouteChangeNotification
+                                                   object: [AVAudioSession sharedInstance]];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(headphoneBluetoothConnectionDidChange:)
+                                                     name:AVAudioSessionRouteChangeNotification
+                                                   object: [AVAudioSession sharedInstance]];
+        #if !TARGET_OS_VISION
+        [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(brightnessDidChange:)
                                                      name:UIScreenBrightnessDidChangeNotification
                                                    object: nil];
+        #endif
 #endif
     }
 
@@ -128,6 +143,9 @@ RCT_EXPORT_MODULE();
             return DeviceTypeTablet;
         case UIUserInterfaceIdiomTV: return DeviceTypeTv;
         case UIUserInterfaceIdiomMac: return DeviceTypeDesktop;
+    #if TARGET_OS_VISION
+        case UIUserInterfaceIdiomVision: return DeviceTypeHeadset;
+    #endif
         default: return DeviceTypeUnknown;
     }
 }
@@ -158,6 +176,14 @@ RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(getDeviceNameSync) {
 
 RCT_EXPORT_METHOD(getDeviceName:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
     resolve(self.getDeviceName);
+}
+
+- (BOOL) isDisplayZoomed {
+    #if !TARGET_OS_VISION
+        return [UIScreen mainScreen].scale != [UIScreen mainScreen].nativeScale;
+    #else
+        return NO;
+    #endif
 }
 
 - (NSString *) getAppName {
@@ -254,6 +280,10 @@ RCT_EXPORT_METHOD(getDeviceName:(RCTPromiseResolveBlock)resolve rejecter:(RCTPro
         @"iPhone14,8": @"iPhone 14 Plus",
         @"iPhone15,2": @"iPhone 14 Pro",
         @"iPhone15,3": @"iPhone 14 Pro Max",
+        @"iPhone15,4": @"iPhone 15",
+        @"iPhone15,5": @"iPhone 15 Plus",
+        @"iPhone16,1": @"iPhone 15 Pro",
+        @"iPhone16,2": @"iPhone 15 Pro Max",
         @"iPad4,1": @"iPad Air", // 5th Generation iPad (iPad Air) - Wifi
         @"iPad4,2": @"iPad Air", // 5th Generation iPad (iPad Air) - Cellular
         @"iPad4,3": @"iPad Air", // 5th Generation iPad (iPad Air)
@@ -299,7 +329,8 @@ RCT_EXPORT_METHOD(getDeviceName:(RCTPromiseResolveBlock)resolve rejecter:(RCTPro
         @"AppleTV3,1": @"Apple TV", // Apple TV (3rd Generation)
         @"AppleTV3,2": @"Apple TV", // Apple TV (3rd Generation - Rev A)
         @"AppleTV5,3": @"Apple TV", // Apple TV (4th Generation)
-        @"AppleTV6,2": @"Apple TV 4K" // Apple TV 4K
+        @"AppleTV6,2": @"Apple TV 4K", // Apple TV 4K
+        @"RealityDevice14,1": @"Apple Vision Pro" // Apple Vision Pro
     };
 }
 
@@ -322,6 +353,8 @@ RCT_EXPORT_METHOD(getDeviceName:(RCTPromiseResolveBlock)resolve rejecter:(RCTPro
         return @"iPhone";
     } else if ([deviceId hasPrefix:@"AppleTV"]) {
         return @"Apple TV";
+    } else if ([deviceId hasPrefix:@"RealityDevice"]) {
+        return @"Apple Vision";
     }
 
     // If we could not even get a generic, it's unknown
@@ -329,7 +362,7 @@ RCT_EXPORT_METHOD(getDeviceName:(RCTPromiseResolveBlock)resolve rejecter:(RCTPro
 }
 
 - (NSString *) getCarrier {
-#if (TARGET_OS_TV || TARGET_OS_MACCATALYST)
+#if (TARGET_OS_TV || TARGET_OS_MACCATALYST || TARGET_OS_VISION)
     return @"unknown";
 #else
     CTTelephonyNetworkInfo *netinfo = [[CTTelephonyNetworkInfo alloc] init];
@@ -455,32 +488,35 @@ RCT_EXPORT_METHOD(getDeviceToken:(RCTPromiseResolveBlock)resolve rejecter:(RCTPr
 - (float) getFontScale {
     // Font scales based on font sizes from https://developer.apple.com/ios/human-interface-guidelines/visual-design/typography/
     float fontScale = 1.0;
-    UITraitCollection *traitCollection = [[UIScreen mainScreen] traitCollection];
 
-    // Shared application is unavailable in an app extension.
-    if (traitCollection) {
-        __block NSString *contentSize = nil;
-        RCTUnsafeExecuteOnMainQueueSync(^{
-            if (@available(iOS 10.0, tvOS 10.0, macCatalyst 13.0, *)) {
-                contentSize = traitCollection.preferredContentSizeCategory;
-            } else {
-                // if we can't get contentSize, we'll fall back to 1.0
-            }
-        });
+    #if !TARGET_OS_VISION
+        UITraitCollection *traitCollection = [[UIScreen mainScreen] traitCollection];
 
-        if ([contentSize isEqual: @"UICTContentSizeCategoryXS"]) fontScale = 0.82;
-        else if ([contentSize isEqual: @"UICTContentSizeCategoryS"]) fontScale = 0.88;
-        else if ([contentSize isEqual: @"UICTContentSizeCategoryM"]) fontScale = 0.95;
-        else if ([contentSize isEqual: @"UICTContentSizeCategoryL"]) fontScale = 1.0;
-        else if ([contentSize isEqual: @"UICTContentSizeCategoryXL"]) fontScale = 1.12;
-        else if ([contentSize isEqual: @"UICTContentSizeCategoryXXL"]) fontScale = 1.23;
-        else if ([contentSize isEqual: @"UICTContentSizeCategoryXXXL"]) fontScale = 1.35;
-        else if ([contentSize isEqual: @"UICTContentSizeCategoryAccessibilityM"]) fontScale = 1.64;
-        else if ([contentSize isEqual: @"UICTContentSizeCategoryAccessibilityL"]) fontScale = 1.95;
-        else if ([contentSize isEqual: @"UICTContentSizeCategoryAccessibilityXL"]) fontScale = 2.35;
-        else if ([contentSize isEqual: @"UICTContentSizeCategoryAccessibilityXXL"]) fontScale = 2.76;
-        else if ([contentSize isEqual: @"UICTContentSizeCategoryAccessibilityXXXL"]) fontScale = 3.12;
-    }
+        // Shared application is unavailable in an app extension.
+        if (traitCollection) {
+            __block NSString *contentSize = nil;
+            RCTUnsafeExecuteOnMainQueueSync(^{
+                if (@available(iOS 10.0, tvOS 10.0, macCatalyst 13.0, *)) {
+                    contentSize = traitCollection.preferredContentSizeCategory;
+                } else {
+                    // if we can't get contentSize, we'll fall back to 1.0
+                }
+            });
+
+            if ([contentSize isEqual: @"UICTContentSizeCategoryXS"]) fontScale = 0.82;
+            else if ([contentSize isEqual: @"UICTContentSizeCategoryS"]) fontScale = 0.88;
+            else if ([contentSize isEqual: @"UICTContentSizeCategoryM"]) fontScale = 0.95;
+            else if ([contentSize isEqual: @"UICTContentSizeCategoryL"]) fontScale = 1.0;
+            else if ([contentSize isEqual: @"UICTContentSizeCategoryXL"]) fontScale = 1.12;
+            else if ([contentSize isEqual: @"UICTContentSizeCategoryXXL"]) fontScale = 1.23;
+            else if ([contentSize isEqual: @"UICTContentSizeCategoryXXXL"]) fontScale = 1.35;
+            else if ([contentSize isEqual: @"UICTContentSizeCategoryAccessibilityM"]) fontScale = 1.64;
+            else if ([contentSize isEqual: @"UICTContentSizeCategoryAccessibilityL"]) fontScale = 1.95;
+            else if ([contentSize isEqual: @"UICTContentSizeCategoryAccessibilityXL"]) fontScale = 2.35;
+            else if ([contentSize isEqual: @"UICTContentSizeCategoryAccessibilityXXL"]) fontScale = 2.76;
+            else if ([contentSize isEqual: @"UICTContentSizeCategoryAccessibilityXXXL"]) fontScale = 3.12;
+        }
+    #endif
 
     return fontScale;
 }
@@ -656,6 +692,22 @@ RCT_EXPORT_METHOD(isPinOrFingerprintSet:(RCTPromiseResolveBlock)resolve rejecter
     [self sendEventWithName:@"RNDeviceInfo_headphoneConnectionDidChange" body:[NSNumber numberWithBool:isConnected]];
 }
 
+- (void) headphoneWiredConnectionDidChange:(NSNotification *)notification {
+    if (!hasListeners) {
+        return;
+    }
+    BOOL isConnected = [self isWiredHeadphonesConnected];
+    [self sendEventWithName:@"RNDeviceInfo_headphoneWiredConnectionDidChange" body:[NSNumber numberWithBool:isConnected]];
+}
+
+- (void) headphoneBluetoothConnectionDidChange:(NSNotification *)notification {
+    if (!hasListeners) {
+        return;
+    }
+    BOOL isConnected = [self isBluetoothHeadphonesConnected];
+    [self sendEventWithName:@"RNDeviceInfo_headphoneBluetoothConnectionDidChange" body:[NSNumber numberWithBool:isConnected]];
+}
+
 - (void) brightnessDidChange:(NSNotification *)notification {
     if (!hasListeners) {
         return;
@@ -761,6 +813,45 @@ RCT_EXPORT_METHOD(isHeadphonesConnected:(RCTPromiseResolveBlock)resolve rejecter
     resolve(@(self.isHeadphonesConnected));
 }
 
+- (BOOL) isWiredHeadphonesConnected {
+    AVAudioSessionRouteDescription* route = [[AVAudioSession sharedInstance] currentRoute];
+    for (AVAudioSessionPortDescription* desc in [route outputs]) {
+        if ([[desc portType] isEqualToString:AVAudioSessionPortHeadphones]) {
+            return YES;
+        }
+    }
+    return NO;
+}
+
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(isWiredHeadphonesConnectedSync) {
+    return @(self.isWiredHeadphonesConnected);
+}
+
+RCT_EXPORT_METHOD(isWiredHeadphonesConnected:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    resolve(@(self.isWiredHeadphonesConnected));
+}
+
+- (BOOL) isBluetoothHeadphonesConnected {
+    AVAudioSessionRouteDescription* route = [[AVAudioSession sharedInstance] currentRoute];
+    for (AVAudioSessionPortDescription* desc in [route outputs]) {
+        if ([[desc portType] isEqualToString:AVAudioSessionPortBluetoothA2DP]) {
+            return YES;
+        }
+        if ([[desc portType] isEqualToString:AVAudioSessionPortBluetoothHFP]) {
+            return YES;
+        }
+    }
+    return NO;
+}
+
+RCT_EXPORT_BLOCKING_SYNCHRONOUS_METHOD(isBluetoothHeadphonesConnectedSync) {
+    return @(self.isBluetoothHeadphonesConnected);
+}
+
+RCT_EXPORT_METHOD(isBluetoothHeadphonesConnected:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject) {
+    resolve(@(self.isBluetoothHeadphonesConnected));
+}
+
 - (unsigned long) getUsedMemory {
     struct task_basic_info info;
     mach_msg_type_number_t size = sizeof(info);
@@ -847,7 +938,7 @@ RCT_EXPORT_METHOD(getInstallerPackageName:(RCTPromiseResolveBlock)resolve reject
 }
 
 - (NSNumber *) getBrightness {
-#if !TARGET_OS_TV
+#if !TARGET_OS_TV && !TARGET_OS_VISION
     return @([UIScreen mainScreen].brightness);
 #else
     return @(-1);
